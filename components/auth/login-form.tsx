@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { LogIn } from "lucide-react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
@@ -34,10 +35,19 @@ export function LoginForm() {
     const response = await authClient.signIn.email(values);
 
     if (response.error) {
-      setErrorMessage(response.error.message ?? "Login gagal. Periksa email dan password.");
+      const message =
+        response.error.message ?? "Login gagal. Periksa email dan password.";
+
+      setErrorMessage(message);
+      toast.error("Login gagal", {
+        description: message,
+      });
       return;
     }
 
+    toast.success("Login berhasil", {
+      description: "Mengalihkan ke dashboard.",
+    });
     router.push("/dashboard");
     router.refresh();
   }

@@ -29,6 +29,13 @@ export const affiliateTypes = [
   "LAINNYA",
 ] as const;
 
+export const postStatuses = [
+  "DRAFT",
+  "SCHEDULED",
+  "PUBLISHED",
+  "ARCHIVED",
+] as const;
+
 export const contentPostSchema = z.object({
   title: z.string().min(1, "Judul wajib diisi"),
   content: z.string().min(1, "Teks konten wajib diisi"),

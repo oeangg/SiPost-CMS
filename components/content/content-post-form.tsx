@@ -3,9 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { CornerDownLeft, FileText, Link2, Plus, Save } from "lucide-react";
-import { createContentPostAction } from "@/app/dashboard/content/actions";
+import { toast } from "sonner";
+import {
+  createContentPostAction,
+  updateContentPostAction,
+} from "@/app/dashboard/content/actions";
+import { ContentRichTextEditor } from "@/components/content/content-rich-text-editor";
 import {
   affiliateTypes,
   contentPostSchema,
@@ -46,14 +51,29 @@ function splitMediaUrls(value: string) {
   return mediaUrls.length > 0 ? mediaUrls : null;
 }
 
-export function ContentPostForm() {
+type ContentPostFormProps = {
+  contentId?: string;
+  defaultValues?: ContentPostFormValues;
+  submitLabel?: string;
+  pendingLabel?: string;
+};
+
+export function ContentPostForm({
+  contentId,
+  defaultValues,
+  submitLabel = "Simpan Konten",
+  pendingLabel = "Menyimpan...",
+}: ContentPostFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [mediaUrlsText, setMediaUrlsText] = useState("");
+  const [mediaUrlsText, setMediaUrlsText] = useState(
+    defaultValues?.mediaUrls?.join("\n") ?? "",
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     watch,
     formState: { errors },
@@ -69,6 +89,7 @@ export function ContentPostForm() {
       contentType: "LAINNYA",
       platform: "TIKTOK",
       affiliateType: "SHOPEE",
+      ...defaultValues,
     },
   });
 
@@ -89,13 +110,21 @@ export function ContentPostForm() {
     };
 
     startTransition(async () => {
-      const response = await createContentPostAction(payload);
+      const response = contentId
+        ? await updateContentPostAction(contentId, payload)
+        : await createContentPostAction(payload);
 
       if (!response.ok) {
         setErrorMessage(response.message);
+        toast.error(contentId ? "Update konten gagal" : "Simpan konten gagal", {
+          description: response.message,
+        });
         return;
       }
 
+      toast.success(contentId ? "Konten berhasil diupdate" : "Konten berhasil dibuat", {
+        description: response.message,
+      });
       router.push("/dashboard/content");
       router.refresh();
     });
@@ -164,11 +193,15 @@ export function ContentPostForm() {
             })}
           </div>
         </div>
-        <Textarea
-          id="content"
-          className="min-h-48"
-          placeholder="Tulis teks konten lengkap di sini..."
-          {...register("content")}
+        <Controller
+          name="content"
+          control={control}
+          render={({ field }) => (
+            <ContentRichTextEditor
+              value={field.value ?? ""}
+              onChange={(value) => field.onChange(value)}
+            />
+          )}
         />
         {errors.content ? (
           <p className="text-sm text-destructive">{errors.content.message}</p>
@@ -228,7 +261,7 @@ export function ContentPostForm() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
           <Save aria-hidden="true" />
-          {isPending ? "Menyimpan..." : "Simpan Konten"}
+          {isPending ? pendingLabel : submitLabel}
         </Button>
         <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => appendToContent("\n\n")}>
           <Plus aria-hidden="true" />
