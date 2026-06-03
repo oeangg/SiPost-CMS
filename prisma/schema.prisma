@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum kategoriContent {
+  TRAVELLING_LAUT
+  TRAVELLING_GUNUNG
+  SOFT_SELLING
+  HARD_SELLING
+  STORYTELLING
+  PERSIB
+  LAINNYA
+}
+
+enum kategoriPlatform {
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  FACEBOOK
+  X
+  THREADS
+  WEBSITE
+  LAINNYA
+}
+
+enum kategoriAfiliate {
+  SHOPEE
+  LAZADA
+  TOKOPEDIA
+  TIKTOK_SHOP
+  LAINNYA
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SUPERVISOR
+  ADMIN
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          UserRole  @default(ADMIN)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model ContentPost {
+  id            String            @id @default(cuid())
+  title         String
+  body          String?
+  hook          String?
+  cta           String?
+  affiliateUrl  String?
+  mediaUrls     String[]          @default([])
+  contentType   kategoriContent
+  platform      kategoriPlatform
+  affiliateType kategoriAfiliate?
+  status        PostStatus        @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  metrics       PostMetric[]
+}
+
+model PostMetric {
+  id            String      @id @default(cuid())
+  contentPostId String
+  contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+  metricDate    DateTime
+  views         Int         @default(0)
+  likes         Int         @default(0)
+  comments      Int         @default(0)
+  shares        Int         @default(0)
+  saves         Int         @default(0)
+  clicks        Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([contentPostId, metricDate])
+}
+
+model AfiliateDailySumary {
+  id            String           @id @default(cuid())
+  summaryDate   DateTime         @unique
+  affiliateType kategoriAfiliate @default(SHOPEE)
+  totalClicks   Int              @default(0)
+  totalOrders   Int              @default(0)
+  totalRevenue  Decimal          @default(0) @db.Decimal(14, 2)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
