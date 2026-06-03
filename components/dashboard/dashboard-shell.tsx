@@ -55,12 +55,12 @@ const sidebarMenu = [
   },
   {
     title: "Post Metrics",
-    url: "/dashboard",
+    url: "/dashboard/input-metrics",
     icon: BarChart3,
   },
   {
     title: "Affiliate Summary",
-    url: "/dashboard",
+    url: "/dashboard/input-metrics",
     icon: Link2,
   },
   {
@@ -151,7 +151,8 @@ function NavMain() {
             (subItem) => pathname === subItem.url,
           );
           const isParentActive =
-            pathname === item.url && item.title === "Dashboard";
+            pathname === item.url ||
+            (item.url !== "/dashboard" && pathname.startsWith(item.url));
 
           if (!hasSubItems) {
             return (

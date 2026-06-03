@@ -30,10 +30,9 @@ function formatCurrency(value: number) {
 }
 
 function getMetricScore(metric: {
-  clicks: number;
   comments: number;
   likes: number;
-  saves: number;
+  repost: number;
   shares: number;
   views: number;
 }) {
@@ -42,8 +41,7 @@ function getMetricScore(metric: {
     metric.likes * 3 +
     metric.comments * 5 +
     metric.shares * 6 +
-    metric.saves * 4 +
-    metric.clicks * 8
+    metric.repost * 4
   );
 }
 
@@ -64,10 +62,9 @@ export default async function DashboardPage() {
     }),
     prisma.postMetric.aggregate({
       _sum: {
-        clicks: true,
         comments: true,
         likes: true,
-        saves: true,
+        repost: true,
         shares: true,
         views: true,
       },
@@ -101,25 +98,23 @@ export default async function DashboardPage() {
     (metricTotals._sum.likes ?? 0) +
     (metricTotals._sum.comments ?? 0) +
     (metricTotals._sum.shares ?? 0) +
-    (metricTotals._sum.saves ?? 0);
+    (metricTotals._sum.repost ?? 0);
   const affiliateRevenue = Number(affiliateTotals._sum.totalRevenue ?? 0);
 
   const leaderboard = postsWithMetrics
     .map((post) => {
       const totals = post.metrics.reduce(
         (accumulator, metric) => ({
-          clicks: accumulator.clicks + metric.clicks,
           comments: accumulator.comments + metric.comments,
           likes: accumulator.likes + metric.likes,
-          saves: accumulator.saves + metric.saves,
+          repost: accumulator.repost + metric.repost,
           shares: accumulator.shares + metric.shares,
           views: accumulator.views + metric.views,
         }),
         {
-          clicks: 0,
           comments: 0,
           likes: 0,
-          saves: 0,
+          repost: 0,
           shares: 0,
           views: 0,
         },
@@ -144,7 +139,7 @@ export default async function DashboardPage() {
     {
       title: "Engagement",
       value: formatNumber(totalEngagement),
-      description: "Likes, komentar, shares, dan saves",
+      description: "Likes, komentar, shares, dan repost",
       icon: BarChart3,
     },
     {
@@ -212,7 +207,7 @@ export default async function DashboardPage() {
                     <TableHead>Platform</TableHead>
                     <TableHead className="text-right">Views</TableHead>
                     <TableHead className="text-right">Engagement</TableHead>
-                    <TableHead className="text-right">Klik</TableHead>
+                    <TableHead className="text-right">Repost</TableHead>
                     <TableHead className="text-right">Score</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -230,7 +225,7 @@ export default async function DashboardPage() {
                       post.totals.likes +
                       post.totals.comments +
                       post.totals.shares +
-                      post.totals.saves;
+                      post.totals.repost;
 
                     return (
                       <TableRow key={post.id}>
@@ -246,7 +241,7 @@ export default async function DashboardPage() {
                         </TableCell>
                         <TableCell className="text-right">{formatNumber(engagement)}</TableCell>
                         <TableCell className="text-right">
-                          {formatNumber(post.totals.clicks)}
+                          {formatNumber(post.totals.repost)}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatNumber(post.metricScore)}
@@ -285,8 +280,8 @@ export default async function DashboardPage() {
                         <p className="font-medium">{formatNumber(post.totals.views)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Klik</p>
-                        <p className="font-medium">{formatNumber(post.totals.clicks)}</p>
+                        <p className="text-xs text-muted-foreground">Repost</p>
+                        <p className="font-medium">{formatNumber(post.totals.repost)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Score</p>
@@ -347,7 +342,7 @@ export default async function DashboardPage() {
               <CardDescription>Bobot leaderboard untuk membaca performa.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 p-4 pt-0 text-sm text-muted-foreground sm:p-6 sm:pt-0">
-              <p>Views x1, likes x3, comments x5, shares x6, saves x4, clicks x8.</p>
+              <p>Views x1, likes x3, comments x5, shares x6, repost x4.</p>
               <p>Score lebih tinggi berarti konten lebih kuat untuk diprioritaskan.</p>
             </CardContent>
           </Card>

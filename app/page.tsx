@@ -27,7 +27,7 @@ const benefits = [
   {
     title: "Metrik per konten",
     description:
-      "Catat views, likes, komentar, share, saves, dan klik spesifik untuk setiap post.",
+      "Catat views, likes, komentar, share, dan repost spesifik untuk setiap post.",
     icon: BarChart3,
   },
   {
