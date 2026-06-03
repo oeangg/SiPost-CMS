@@ -51,12 +51,21 @@ function htmlToPlainText(value: string | null) {
 function composeContentText(content: {
   affiliateUrl: string | null;
   body: string | null;
-  cta: string | null;
-  hook: string | null;
 }) {
-  return [content.hook, htmlToPlainText(content.body), content.cta, content.affiliateUrl]
+  return [htmlToPlainText(content.body), content.affiliateUrl]
     .filter((value) => value && value.trim())
     .join("\n\n");
+}
+
+function formatPublishedAt(value: Date | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(value);
 }
 
 function getSingleSearchParam(
@@ -127,7 +136,7 @@ export default async function ContentDashboardPage({
   const where: Prisma.ContentPostWhereInput = {};
 
   if (filters.q) {
-    where.title = {
+    where.hook = {
       contains: filters.q,
       mode: "insensitive",
     };
@@ -176,7 +185,7 @@ export default async function ContentDashboardPage({
             Content Manager
           </h1>
           <p className="mt-1 text-sm font-bold text-foreground">
-            Kelola draft, platform, kategori, hook, CTA, dan link affiliate.
+            Kelola draft, platform, kategori, hook, dan link affiliate.
           </p>
         </div>
         <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-3">
@@ -221,7 +230,7 @@ export default async function ContentDashboardPage({
                 <Input
                   name="q"
                   className="pl-9"
-                  placeholder="Cari judul konten"
+                  placeholder="Cari hook konten"
                   defaultValue={filters.q}
                 />
               </div>
@@ -295,7 +304,7 @@ export default async function ContentDashboardPage({
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold">
-                          {content.title}
+                          {content.hook || "-"}
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {content.platform} / {content.contentType}
@@ -305,14 +314,15 @@ export default async function ContentDashboardPage({
                         <ContentPostStatusSelect
                           contentId={content.id}
                           status={content.status}
+                          publishedAt={content.publishedAt}
                         />
                       </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground">
-                        CTA
-                      </p>
-                      <p className="mt-1 text-sm">{content.cta || "-"}</p>
+                    <p className="overflow-hidden text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                      {htmlToPlainText(content.body) || "-"}
+                    </p>
+                    <div className="text-xs font-medium text-muted-foreground">
+                      Publish: {formatPublishedAt(content.publishedAt)}
                     </div>
                     <div className="flex justify-end">
                       <ContentPostActions
@@ -326,14 +336,14 @@ export default async function ContentDashboardPage({
             </div>
 
             <div className="hidden md:block">
-              <Table className="min-w-190">
+              <Table className="min-w-230">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Judul</TableHead>
-                    <TableHead>Platform</TableHead>
+                    <TableHead>Hook</TableHead>
+                    <TableHead>Content</TableHead>
                     <TableHead>Kategori</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>CTA</TableHead>
+                    <TableHead>Date Publish_At</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -341,7 +351,7 @@ export default async function ContentDashboardPage({
                   {contentPosts.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={5}
                         className="text-center text-muted-foreground"
                       >
                         Belum ada konten.
@@ -352,18 +362,23 @@ export default async function ContentDashboardPage({
                   {contentPosts.map((content) => (
                     <TableRow key={content.id}>
                       <TableCell className="font-medium">
-                        {content.title}
+                        {content.hook || "-"}
                       </TableCell>
-                      <TableCell>{content.platform}</TableCell>
+                      <TableCell className="max-w-sm text-muted-foreground">
+                        <p className="overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                          {htmlToPlainText(content.body) || "-"}
+                        </p>
+                      </TableCell>
                       <TableCell>{content.contentType}</TableCell>
                       <TableCell>
                         <ContentPostStatusSelect
                           contentId={content.id}
                           status={content.status}
+                          publishedAt={content.publishedAt}
                         />
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {content.cta || "-"}
+                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                        {formatPublishedAt(content.publishedAt)}
                       </TableCell>
                       <TableCell className="text-right">
                         <ContentPostActions

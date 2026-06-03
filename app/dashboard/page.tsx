@@ -208,7 +208,7 @@ export default async function DashboardPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Rank</TableHead>
-                    <TableHead>Judul</TableHead>
+                    <TableHead>Hook</TableHead>
                     <TableHead>Platform</TableHead>
                     <TableHead className="text-right">Views</TableHead>
                     <TableHead className="text-right">Engagement</TableHead>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
                             #{index + 1}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-medium">{post.title}</TableCell>
+                        <TableCell className="font-medium">{post.hook || "-"}</TableCell>
                         <TableCell>{post.platform}</TableCell>
                         <TableCell className="text-right">
                           {formatNumber(post.totals.views)}
@@ -274,7 +274,7 @@ export default async function DashboardPage() {
                   <CardContent className="space-y-3 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="truncate text-sm font-semibold">{post.title}</h3>
+                        <h3 className="truncate text-sm font-semibold">{post.hook || "-"}</h3>
                         <p className="mt-1 text-xs text-muted-foreground">{post.platform}</p>
                       </div>
                       <Badge variant={index < 3 ? "success" : "secondary"}>#{index + 1}</Badge>

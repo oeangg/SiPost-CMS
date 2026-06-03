@@ -22,12 +22,9 @@ import { cn } from "@/lib/utils";
 
 type ContentPostActionItem = {
   id: string;
-  title: string;
   body: string | null;
   hook: string | null;
-  cta: string | null;
   affiliateUrl: string | null;
-  mediaUrls: string[];
   contentType: string;
   platform: string;
   affiliateType: string | null;
@@ -142,10 +139,19 @@ export function ContentPostActions({
   }
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setIsMenuOpen(false);
-    window.setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setIsMenuOpen(false);
+      toast.success("Teks konten tersalin", {
+        description: "Content dan Affiliate URL berhasil disalin.",
+      });
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Copy gagal", {
+        description: "Browser tidak mengizinkan akses clipboard.",
+      });
+    }
   }
 
   function handleDelete() {
@@ -177,7 +183,7 @@ export function ContentPostActions({
           size="icon"
           variant="secondary"
           aria-expanded={isMenuOpen}
-          aria-label={`Action ${content.title}`}
+          aria-label={`Action ${content.hook || "konten"}`}
           onClick={(event) => {
             if (isMenuOpen) {
               setIsMenuOpen(false);
@@ -262,7 +268,7 @@ export function ContentPostActions({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <DialogPrimitive.Title className="wrap-break-words text-2xl font-black">
-                  {content.title}
+                  {content.hook || "Konten tanpa hook"}
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="mt-1 text-sm font-medium text-muted-foreground">
                   Detail konten tersimpan.
@@ -287,8 +293,6 @@ export function ContentPostActions({
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <DetailRow label="Hook" value={content.hook} />
-              <DetailRow label="CTA" value={content.cta} />
               <DetailRow label="Affiliate" value={content.affiliateType} />
               <DetailRow label="Affiliate URL" value={content.affiliateUrl} />
               <DetailRow
@@ -299,14 +303,6 @@ export function ContentPostActions({
               <DetailRow
                 label="Diupdate"
                 value={formatDate(content.updatedAt)}
-              />
-              <DetailRow
-                label="Media"
-                value={
-                  content.mediaUrls.length > 0
-                    ? content.mediaUrls.join(", ")
-                    : "-"
-                }
               />
             </div>
 
@@ -338,7 +334,7 @@ export function ContentPostActions({
               <DialogPrimitive.Description className="mt-2 text-sm font-medium text-muted-foreground">
                 Konten{" "}
                 <span className="font-black text-foreground">
-                  {content.title}
+                  {content.hook || "Konten tanpa hook"}
                 </span>{" "}
                 akan dihapus permanen. Aksi ini tidak bisa dibatalkan.
               </DialogPrimitive.Description>

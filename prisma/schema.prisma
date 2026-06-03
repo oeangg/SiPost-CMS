@@ -101,10 +101,8 @@ model Verification {
 
 model ContentPost {
   id            String            @id @default(cuid())
-  title         String
   body          String?
   hook          String?
-  cta           String?
   affiliateUrl  String?
   mediaUrls     String[]          @default([])
   contentType   kategoriContent

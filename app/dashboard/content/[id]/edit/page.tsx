@@ -49,19 +49,16 @@ export default async function EditContentPage({ params }: EditContentPageProps) 
         <CardHeader>
           <CardTitle>Form Konten</CardTitle>
           <CardDescription className="font-medium">
-            Perbarui teks, hook, CTA, link affiliate, dan media konten.
+            Perbarui hook, teks, link affiliate, platform, dan kategori konten.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ContentPostForm
             contentId={content.id}
             defaultValues={{
-              title: content.title,
               content: content.body ?? "",
               hook: content.hook ?? "",
-              cta: content.cta ?? "",
               affiliateUrl: content.affiliateUrl ?? "",
-              mediaUrls: content.mediaUrls,
               contentType: content.contentType,
               platform: content.platform,
               affiliateType: content.affiliateType ?? "",

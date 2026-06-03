@@ -91,8 +91,14 @@ function DashboardBreadcrumb() {
         const href = `/${pathSegments.slice(0, index + 2).join("/")}`;
 
         return (
-          <div key={`${segment}-${href}`} className="flex min-w-0 items-center gap-2">
-            <ChevronRight className="hidden h-4 w-4 shrink-0 md:block" aria-hidden="true" />
+          <div
+            key={`${segment}-${href}`}
+            className="flex min-w-0 items-center gap-2"
+          >
+            <ChevronRight
+              className="hidden h-4 w-4 shrink-0 md:block"
+              aria-hidden="true"
+            />
             {isLast ? (
               <span className="truncate font-black text-foreground">
                 {formatSegment(segment)}
@@ -121,8 +127,10 @@ function HeaderSidebar() {
             <GalleryVerticalEnd className="size-4" aria-hidden="true" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-black">SiPost CMS.</span>
-            <span className="truncate text-xs font-bold">Content Intelligence</span>
+            <span className="truncate font-black ">SiPost CMS.</span>
+            <span className="truncate text-xs font-bold">
+              Content Intelligence
+            </span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -186,7 +194,11 @@ function NavMain() {
 
                   return (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild isActive={isCurrent} className="font-bold">
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isCurrent}
+                        className="font-bold"
+                      >
                         <Link href={subItem.url}>
                           <span>{subItem.title}</span>
                         </Link>
@@ -246,7 +258,9 @@ export function DashboardShell({
               <DashboardBreadcrumb />
               <div className="hidden min-w-0 border-2 border-border bg-card px-3 py-1 text-right shadow-xs sm:block">
                 <p className="truncate text-sm font-black">{firstName}</p>
-                <p className="truncate text-xs font-bold text-muted-foreground">{userEmail}</p>
+                <p className="truncate text-xs font-bold text-muted-foreground">
+                  {userEmail}
+                </p>
               </div>
             </div>
           </div>

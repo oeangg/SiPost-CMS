@@ -30,7 +30,7 @@ export default function NewContentPage() {
         <CardHeader>
           <CardTitle>Form Konten</CardTitle>
           <CardDescription className="font-medium">
-            Susun teks, hook, CTA, link affiliate, dan media opsional untuk konten baru.
+            Susun hook, teks, link affiliate, platform, dan kategori untuk konten baru.
           </CardDescription>
         </CardHeader>
         <CardContent>

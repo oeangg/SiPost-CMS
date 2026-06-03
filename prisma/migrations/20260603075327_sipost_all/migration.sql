@@ -11,7 +11,7 @@ CREATE TYPE "kategoriAfiliate" AS ENUM ('SHOPEE', 'LAZADA', 'TOKOPEDIA', 'TIKTOK
 CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED');
 
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('SUPER_ADMIN', 'ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('SUPER_ADMIN', 'SUPERVISOR', 'ADMIN');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -75,10 +75,8 @@ CREATE TABLE "Verification" (
 -- CreateTable
 CREATE TABLE "ContentPost" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
     "body" TEXT,
     "hook" TEXT,
-    "cta" TEXT,
     "affiliateUrl" TEXT,
     "mediaUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "contentType" "kategoriContent" NOT NULL,

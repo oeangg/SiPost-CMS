@@ -35,12 +35,9 @@ export async function createContentPostAction(values: ContentPostFormValues) {
 
   await prisma.contentPost.create({
     data: {
-      title: data.title,
       body: data.content,
-      hook: data.hook || null,
-      cta: data.cta || null,
+      hook: data.hook,
       affiliateUrl: data.affiliateUrl || null,
-      mediaUrls: data.mediaUrls ?? [],
       contentType: data.contentType,
       platform: data.platform,
       affiliateType: data.affiliateType || null,
@@ -86,12 +83,9 @@ export async function updateContentPostAction(
       id,
     },
     data: {
-      title: data.title,
       body: data.content,
-      hook: data.hook || null,
-      cta: data.cta || null,
+      hook: data.hook,
       affiliateUrl: data.affiliateUrl || null,
-      mediaUrls: data.mediaUrls ?? [],
       contentType: data.contentType,
       platform: data.platform,
       affiliateType: data.affiliateType || null,
@@ -135,7 +129,11 @@ export async function deleteContentPostAction(id: string) {
   };
 }
 
-export async function updateContentPostStatusAction(id: string, status: string) {
+export async function updateContentPostStatusAction(
+  id: string,
+  status: string,
+  publishedAt?: string | null,
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -154,12 +152,27 @@ export async function updateContentPostStatusAction(id: string, status: string) 
     };
   }
 
+  const typedStatus = status as (typeof postStatuses)[number];
+  let nextPublishedAt: Date | null = null;
+
+  if (typedStatus === "PUBLISHED") {
+    nextPublishedAt = new Date(publishedAt ?? "");
+
+    if (Number.isNaN(nextPublishedAt.getTime())) {
+      return {
+        ok: false,
+        message: "Tanggal publish tidak valid.",
+      };
+    }
+  }
+
   await prisma.contentPost.update({
     where: {
       id,
     },
     data: {
-      status: status as (typeof postStatuses)[number],
+      status: typedStatus,
+      publishedAt: nextPublishedAt,
     },
   });
 
