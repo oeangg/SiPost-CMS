@@ -116,19 +116,22 @@ model ContentPost {
 }
 
 model PostMetric {
-  id            String      @id @default(cuid())
-  contentPostId String
-  contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
-  metricDate    DateTime
-  views         Int         @default(0)
-  likes         Int         @default(0)
-  comments      Int         @default(0)
-  shares        Int         @default(0)
-  repost        Int         @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id                    String               @id @default(cuid())
+  contentPostId         String
+  contentPost           ContentPost          @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+  afiliateDailySumaryId String?
+  afiliateDailySumary   AfiliateDailySumary? @relation(fields: [afiliateDailySumaryId], references: [id], onDelete: SetNull)
+  metricDate            DateTime
+  views                 Int                  @default(0)
+  likes                 Int                  @default(0)
+  comments              Int                  @default(0)
+  shares                Int                  @default(0)
+  repost                Int                  @default(0)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   @@unique([contentPostId, metricDate])
+  @@index([afiliateDailySumaryId])
 }
 
 model AfiliateDailySumary {
@@ -141,4 +144,5 @@ model AfiliateDailySumary {
   notes         String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  metrics       PostMetric[]
 }

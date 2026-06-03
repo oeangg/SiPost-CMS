@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  CalendarDays,
   ChevronRight,
   FileText,
   GalleryVerticalEnd,
@@ -39,6 +40,11 @@ const sidebarMenu = [
     icon: LayoutDashboard,
   },
   {
+    title: "Calendar",
+    url: "/dashboard/calendar",
+    icon: CalendarDays,
+  },
+  {
     title: "Content",
     url: "/dashboard/content",
     icon: FileText,
@@ -53,6 +59,7 @@ const sidebarMenu = [
       },
     ],
   },
+
   {
     title: "Post Metrics",
     url: "/dashboard/input-metrics",
@@ -60,7 +67,7 @@ const sidebarMenu = [
   },
   {
     title: "Affiliate Summary",
-    url: "/dashboard/input-metrics",
+    url: "/dashboard/affiliate-summary",
     icon: Link2,
   },
   {
