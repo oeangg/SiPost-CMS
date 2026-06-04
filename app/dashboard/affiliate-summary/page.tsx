@@ -468,6 +468,11 @@ export default async function AffiliateSummaryPage({
                                 {htmlToPlainText(post.body) ||
                                   "Tidak ada body konten."}
                               </p>
+                              {post.cta ? (
+                                <p className="mt-2 overflow-hidden text-sm font-medium [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">
+                                  CTA: {post.cta}
+                                </p>
+                              ) : null}
                             </div>
                             <div className="grid grid-cols-4 gap-2 text-sm">
                               <div>

@@ -52,8 +52,9 @@ function htmlToPlainText(value: string | null) {
 function composeContentText(content: {
   affiliateUrl: string | null;
   body: string | null;
+  cta: string | null;
 }) {
-  return [htmlToPlainText(content.body), content.affiliateUrl]
+  return [htmlToPlainText(content.body), content.cta, content.affiliateUrl]
     .filter((value) => value && value.trim())
     .join("\n\n");
 }
@@ -352,6 +353,11 @@ export default async function ContentDashboardPage({
                     <p className="overflow-hidden text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                       {htmlToPlainText(content.body) || "-"}
                     </p>
+                    {content.cta ? (
+                      <p className="overflow-hidden text-sm font-medium [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">
+                        CTA: {content.cta}
+                      </p>
+                    ) : null}
                     <div className="text-xs font-medium text-muted-foreground">
                       Publish: {formatPublishedAt(content.publishedAt)}
                     </div>
@@ -372,6 +378,7 @@ export default async function ContentDashboardPage({
                   <TableRow>
                     <TableHead>Hook</TableHead>
                     <TableHead>Content</TableHead>
+                    <TableHead>CTA</TableHead>
                     <TableHead>Kategori</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date Publish_At</TableHead>
@@ -382,7 +389,7 @@ export default async function ContentDashboardPage({
                   {contentPosts.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={7}
                         className="text-center text-muted-foreground"
                       >
                         Belum ada konten.
@@ -398,6 +405,11 @@ export default async function ContentDashboardPage({
                       <TableCell className="max-w-sm text-muted-foreground">
                         <p className="overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                           {htmlToPlainText(content.body) || "-"}
+                        </p>
+                      </TableCell>
+                      <TableCell className="max-w-xs text-muted-foreground">
+                        <p className="overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                          {content.cta || "-"}
                         </p>
                       </TableCell>
                       <TableCell>{content.categoryName.categoryName}</TableCell>

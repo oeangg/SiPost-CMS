@@ -26,6 +26,7 @@ export const postStatuses = [
 
 export const contentPostSchema = z.object({
   hook: z.string().min(1, "Hook wajib diisi"),
+  cta: z.string().max(280, "CTA maksimal 280 karakter").optional().nullable().or(z.literal("")),
   content: z.string().min(1, "Teks konten wajib diisi"),
   affiliateUrl: z
     .string()

@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 const defaultCategoryContents = ["TRAVELLING", "PERSIB", "GUNUNG", "LAUT"];
 
 async function main() {
-  const email = "admin@sipost.org";
+  const email = "oeang@sipost.net";
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -12,7 +12,7 @@ async function main() {
   if (!existingUser) {
     await auth.api.signUpEmail({
       body: {
-        name: "Super Admin",
+        name: "Subhan Mohammad",
         email,
         password: "Admin123!@",
       },

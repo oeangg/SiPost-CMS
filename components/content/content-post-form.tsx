@@ -53,6 +53,7 @@ export function ContentPostForm({
     defaultValues: {
       content: "",
       hook: "",
+      cta: "",
       affiliateUrl: "",
       categoryId: categories[0]?.id ?? "",
       platform: "THREADS",
@@ -96,6 +97,18 @@ export function ContentPostForm({
             {...register("hook")}
           />
           {errors.hook ? <p className="text-sm text-destructive">{errors.hook.message}</p> : null}
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="cta">CTA</Label>
+          <Input
+            id="cta"
+            placeholder="Ajakan aksi, contoh: Klik link di bio untuk cek detailnya"
+            {...register("cta")}
+          />
+          {errors.cta ? (
+            <p className="text-sm text-destructive">{errors.cta.message}</p>
+          ) : null}
         </div>
 
         <div className="space-y-2">

@@ -74,6 +74,7 @@ CREATE TABLE "ContentPost" (
     "id" TEXT NOT NULL,
     "body" TEXT,
     "hook" TEXT,
+    "cta" TEXT,
     "affiliateUrl" TEXT,
     "mediaUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "userId" TEXT NOT NULL,
@@ -137,13 +138,22 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
 
 -- CreateIndex
+CREATE INDEX "ContentPost_userId_idx" ON "ContentPost"("userId");
+
+-- CreateIndex
+CREATE INDEX "ContentPost_categoryId_idx" ON "ContentPost"("categoryId");
+
+-- CreateIndex
+CREATE INDEX "CategoryContent_userId_idx" ON "CategoryContent"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CategoryContent_userId_categoryName_key" ON "CategoryContent"("userId", "categoryName");
+
+-- CreateIndex
 CREATE INDEX "PostMetric_afiliateDailySumaryId_idx" ON "PostMetric"("afiliateDailySumaryId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PostMetric_contentPostId_metricDate_key" ON "PostMetric"("contentPostId", "metricDate");
-
--- CreateIndex
-CREATE UNIQUE INDEX "AfiliateDailySumary_summaryDate_key" ON "AfiliateDailySumary"("summaryDate");
 
 -- CreateIndex
 CREATE INDEX "AfiliateDailySumary_userId_idx" ON "AfiliateDailySumary"("userId");

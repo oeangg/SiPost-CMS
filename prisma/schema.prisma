@@ -37,19 +37,19 @@ enum UserRole {
 }
 
 model User {
-  id                      String                 @id
-  name                    String
-  email                   String                 @unique
-  emailVerified           Boolean                @default(false)
-  image                   String?
-  role                    UserRole               @default(ADMIN)
-  createdAt               DateTime               @default(now())
-  updatedAt               DateTime               @updatedAt
-  sessions                Session[]
-  accounts                Account[]
-  contentPosts            ContentPost[]
-  categoryContents        CategoryContent[]
-  afiliateDailySumaries   AfiliateDailySumary[]
+  id                    String                @id
+  name                  String
+  email                 String                @unique
+  emailVerified         Boolean               @default(false)
+  image                 String?
+  role                  UserRole              @default(ADMIN)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  sessions              Session[]
+  accounts              Account[]
+  contentPosts          ContentPost[]
+  categoryContents      CategoryContent[]
+  afiliateDailySumaries AfiliateDailySumary[]
 }
 
 model Session {
@@ -91,17 +91,18 @@ model Verification {
 }
 
 model ContentPost {
-  id            String            @id @default(cuid())
-  body          String?
-  hook          String?
-  affiliateUrl  String?
-  mediaUrls     String[]          @default([])
+  id           String   @id @default(cuid())
+  body         String?
+  hook         String?
+  cta          String?
+  affiliateUrl String?
+  mediaUrls    String[] @default([])
 
-  userId        String
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  categoryId    String
-  categoryName  CategoryContent   @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  categoryName CategoryContent @relation(fields: [categoryId], references: [id])
 
   platform      kategoriPlatform
   affiliateType kategoriAfiliate?
@@ -119,8 +120,8 @@ model CategoryContent {
   id           String @id @default(cuid())
   categoryName String
 
-  userId       String
-  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   contentPosts ContentPost[]
 

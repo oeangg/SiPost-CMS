@@ -24,6 +24,7 @@ type ContentPostActionItem = {
   id: string;
   body: string | null;
   hook: string | null;
+  cta: string | null;
   affiliateUrl: string | null;
   categoryName: {
     categoryName: string;
@@ -146,7 +147,7 @@ export function ContentPostActions({
       setCopied(true);
       setIsMenuOpen(false);
       toast.success("Teks konten tersalin", {
-        description: "Content dan Affiliate URL berhasil disalin.",
+        description: "Content, CTA, dan Affiliate URL berhasil disalin.",
       });
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -295,6 +296,7 @@ export function ContentPostActions({
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
+              <DetailRow label="CTA" value={content.cta} />
               <DetailRow label="Affiliate" value={content.affiliateType} />
               <DetailRow label="Affiliate URL" value={content.affiliateUrl} />
               <DetailRow

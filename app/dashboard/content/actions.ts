@@ -55,6 +55,7 @@ export async function createContentPostAction(values: ContentPostFormValues) {
       userId,
       body: data.content,
       hook: data.hook,
+      cta: data.cta || null,
       affiliateUrl: data.affiliateUrl || null,
       categoryId: data.categoryId,
       platform: data.platform,
@@ -121,6 +122,7 @@ export async function updateContentPostAction(
     data: {
       body: data.content,
       hook: data.hook,
+      cta: data.cta || null,
       affiliateUrl: data.affiliateUrl || null,
       categoryId: data.categoryId,
       platform: data.platform,

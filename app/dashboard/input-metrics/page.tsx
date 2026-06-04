@@ -319,6 +319,11 @@ export default async function InputMetricsPage({
                           {htmlToPlainText(content.body) ||
                             "Tidak ada body konten."}
                         </CardDescription>
+                        {content.cta ? (
+                          <p className="mt-2 overflow-hidden text-sm font-medium [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">
+                            CTA: {content.cta}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </CardHeader>
