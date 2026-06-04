@@ -31,9 +31,7 @@ export const affiliateTypes = [
 
 export const postStatuses = [
   "DRAFT",
-  "SCHEDULED",
   "PUBLISHED",
-  "ARCHIVED",
 ] as const;
 
 export const contentPostSchema = z.object({

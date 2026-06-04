@@ -1,14 +1,11 @@
 -- CreateEnum
-CREATE TYPE "kategoriContent" AS ENUM ('TRAVELLING_LAUT', 'TRAVELLING_GUNUNG', 'SOFT_SELLING', 'HARD_SELLING', 'STORYTELLING', 'PERSIB', 'LAINNYA');
+CREATE TYPE "kategoriPlatform" AS ENUM ('FACEBOOK', 'INSTAGRAM', 'THREADS', 'TIKTOK', 'WEBSITE', 'X', 'YOUTUBE', 'LAINNYA');
 
 -- CreateEnum
-CREATE TYPE "kategoriPlatform" AS ENUM ('INSTAGRAM', 'TIKTOK', 'YOUTUBE', 'FACEBOOK', 'X', 'THREADS', 'WEBSITE', 'LAINNYA');
+CREATE TYPE "kategoriAfiliate" AS ENUM ('LAZADA', 'TOKOPEDIA', 'TIKTOK_SHOP', 'SHOPEE', 'LAINNYA');
 
 -- CreateEnum
-CREATE TYPE "kategoriAfiliate" AS ENUM ('SHOPEE', 'LAZADA', 'TOKOPEDIA', 'TIKTOK_SHOP', 'LAINNYA');
-
--- CreateEnum
-CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED');
+CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED');
 
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('SUPER_ADMIN', 'SUPERVISOR', 'ADMIN');
@@ -79,7 +76,8 @@ CREATE TABLE "ContentPost" (
     "hook" TEXT,
     "affiliateUrl" TEXT,
     "mediaUrls" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "contentType" "kategoriContent" NOT NULL,
+    "userId" TEXT NOT NULL,
+    "categoryId" TEXT NOT NULL,
     "platform" "kategoriPlatform" NOT NULL,
     "affiliateType" "kategoriAfiliate",
     "status" "PostStatus" NOT NULL DEFAULT 'DRAFT',
@@ -91,16 +89,25 @@ CREATE TABLE "ContentPost" (
 );
 
 -- CreateTable
+CREATE TABLE "CategoryContent" (
+    "id" TEXT NOT NULL,
+    "categoryName" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "CategoryContent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "PostMetric" (
     "id" TEXT NOT NULL,
     "contentPostId" TEXT NOT NULL,
+    "afiliateDailySumaryId" TEXT,
     "metricDate" TIMESTAMP(3) NOT NULL,
     "views" INTEGER NOT NULL DEFAULT 0,
     "likes" INTEGER NOT NULL DEFAULT 0,
     "comments" INTEGER NOT NULL DEFAULT 0,
     "shares" INTEGER NOT NULL DEFAULT 0,
-    "saves" INTEGER NOT NULL DEFAULT 0,
-    "clicks" INTEGER NOT NULL DEFAULT 0,
+    "repost" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -110,6 +117,7 @@ CREATE TABLE "PostMetric" (
 -- CreateTable
 CREATE TABLE "AfiliateDailySumary" (
     "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "summaryDate" TIMESTAMP(3) NOT NULL,
     "affiliateType" "kategoriAfiliate" NOT NULL DEFAULT 'SHOPEE',
     "totalClicks" INTEGER NOT NULL DEFAULT 0,
@@ -129,10 +137,19 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
 
 -- CreateIndex
+CREATE INDEX "PostMetric_afiliateDailySumaryId_idx" ON "PostMetric"("afiliateDailySumaryId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PostMetric_contentPostId_metricDate_key" ON "PostMetric"("contentPostId", "metricDate");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AfiliateDailySumary_summaryDate_key" ON "AfiliateDailySumary"("summaryDate");
+
+-- CreateIndex
+CREATE INDEX "AfiliateDailySumary_userId_idx" ON "AfiliateDailySumary"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AfiliateDailySumary_userId_summaryDate_affiliateType_key" ON "AfiliateDailySumary"("userId", "summaryDate", "affiliateType");
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -141,4 +158,19 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ContentPost" ADD CONSTRAINT "ContentPost_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ContentPost" ADD CONSTRAINT "ContentPost_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "CategoryContent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CategoryContent" ADD CONSTRAINT "CategoryContent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "PostMetric" ADD CONSTRAINT "PostMetric_contentPostId_fkey" FOREIGN KEY ("contentPostId") REFERENCES "ContentPost"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PostMetric" ADD CONSTRAINT "PostMetric_afiliateDailySumaryId_fkey" FOREIGN KEY ("afiliateDailySumaryId") REFERENCES "AfiliateDailySumary"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AfiliateDailySumary" ADD CONSTRAINT "AfiliateDailySumary_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

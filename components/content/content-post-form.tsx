@@ -51,7 +51,7 @@ export function ContentPostForm({
       hook: "",
       affiliateUrl: "",
       contentType: "LAINNYA",
-      platform: "TIKTOK",
+      platform: "THREADS",
       affiliateType: "SHOPEE",
       ...defaultValues,
     },

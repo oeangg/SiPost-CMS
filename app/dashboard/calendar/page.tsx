@@ -234,7 +234,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="overflow-x-auto">
-            <div className="min-w-[920px]">
+            <div className="min-w-230">
               <div className="grid grid-cols-7 border-l-2 border-t-2 border-border">
                 {dayLabels.map((label) => (
                   <div

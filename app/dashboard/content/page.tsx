@@ -195,13 +195,21 @@ export default async function ContentDashboardPage({
               <span className="truncate">Buat Content</span>
             </Link>
           </Button>
-          <Button variant="secondary" className="h-11 w-full px-3 sm:w-44" asChild>
+          <Button
+            variant="secondary"
+            className="h-11 w-full px-3 sm:w-44"
+            asChild
+          >
             <Link href="/dashboard">
               <BarChart3 aria-hidden="true" />
               <span className="truncate">Lihat Leaderboard</span>
             </Link>
           </Button>
-          <Button variant="secondary" className="h-11 w-full px-3 sm:w-44" asChild>
+          <Button
+            variant="secondary"
+            className="h-11 w-full px-3 sm:w-44"
+            asChild
+          >
             <Link href="/dashboard">
               <Link2 aria-hidden="true" />
               <span className="truncate">Analitik Affiliate</span>

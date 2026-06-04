@@ -2,7 +2,6 @@
 
 import {
   BarChart3,
-  CalendarDays,
   ChevronRight,
   FileText,
   GalleryVerticalEnd,
@@ -39,16 +38,16 @@ const sidebarMenu = [
     url: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    title: "Calendar",
-    url: "/dashboard/calendar",
-    icon: CalendarDays,
-  },
+
   {
     title: "Content",
     url: "/dashboard/content",
     icon: FileText,
     items: [
+      {
+        title: "Calender Konten",
+        url: "/dashboard/calendar",
+      },
       {
         title: "Daftar Konten",
         url: "/dashboard/content",

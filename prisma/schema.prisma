@@ -6,40 +6,29 @@ datasource db {
   provider = "postgresql"
 }
 
-enum kategoriContent {
-  TRAVELLING_LAUT
-  TRAVELLING_GUNUNG
-  SOFT_SELLING
-  HARD_SELLING
-  STORYTELLING
-  PERSIB
-  LAINNYA
-}
 
 enum kategoriPlatform {
-  INSTAGRAM
-  TIKTOK
-  YOUTUBE
   FACEBOOK
-  X
+  INSTAGRAM
   THREADS
+  TIKTOK
   WEBSITE
+  X
+  YOUTUBE
   LAINNYA
 }
 
 enum kategoriAfiliate {
-  SHOPEE
   LAZADA
   TOKOPEDIA
   TIKTOK_SHOP
+  SHOPEE
   LAINNYA
 }
 
 enum PostStatus {
   DRAFT
-  SCHEDULED
   PUBLISHED
-  ARCHIVED
 }
 
 enum UserRole {
@@ -59,6 +48,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  contentPost ContentPost[]
+  categoryContent  CategoryContent[]
+   afiliateDailySumaries   AfiliateDailySumary[]
 }
 
 model Session {
@@ -105,14 +97,30 @@ model ContentPost {
   hook          String?
   affiliateUrl  String?
   mediaUrls     String[]          @default([])
-  contentType   kategoriContent
-  platform      kategoriPlatform
+  
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId  String
+  categoryName CategoryContent @relation(fields: [categoryId], references: [id])
+
+  platform      kategoriPlatform 
   affiliateType kategoriAfiliate?
   status        PostStatus        @default(DRAFT)
   publishedAt   DateTime?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   metrics       PostMetric[]
+}
+
+model CategoryContent {
+  id  String  @id @default(cuid())
+  categoryName String
+
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentPost ContentPost[]
 }
 
 model PostMetric {
@@ -136,6 +144,10 @@ model PostMetric {
 
 model AfiliateDailySumary {
   id            String           @id @default(cuid())
+
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   summaryDate   DateTime         @unique
   affiliateType kategoriAfiliate @default(SHOPEE)
   totalClicks   Int              @default(0)
@@ -145,4 +157,7 @@ model AfiliateDailySumary {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   metrics       PostMetric[]
+  
+  @@unique([userId, summaryDate, affiliateType])
+    @@index([userId])
 }
