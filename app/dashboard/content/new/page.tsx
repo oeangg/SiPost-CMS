@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { ContentPostForm } from "@/components/content/content-post-form";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export default function NewContentPage() {
+export default async function NewContentPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const categories = session
+    ? await prisma.categoryContent.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        orderBy: {
+          categoryName: "asc",
+        },
+      })
+    : [];
+
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-2 sm:p-6">
       <div className="flex flex-col gap-3 border-2 border-border bg-accent p-4 shadow-md sm:flex-row sm:items-center sm:justify-between">
@@ -34,7 +51,16 @@ export default function NewContentPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ContentPostForm />
+          {categories.length === 0 ? (
+            <div className="mb-4 rounded-md border-2 border-dashed border-border p-4 text-sm font-medium text-muted-foreground">
+              Belum ada kategori. Buat kategori konten dulu di{" "}
+              <Link href="/dashboard/pengaturan/category" className="font-black text-foreground underline">
+                Pengaturan Kategori
+              </Link>
+              .
+            </div>
+          ) : null}
+          <ContentPostForm categories={categories} />
         </CardContent>
       </Card>
     </div>

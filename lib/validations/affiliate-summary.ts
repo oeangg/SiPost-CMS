@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { affiliateTypes } from "@/lib/validations/content-post";
 
 const nonNegativeInteger = z
   .number()
@@ -11,6 +12,7 @@ const nonNegativeNumber = z
 
 export const affiliateDailySummarySchema = z.object({
   summaryDate: z.string().min(1, "Tanggal wajib diisi."),
+  affiliateType: z.enum(affiliateTypes),
   totalClicks: nonNegativeInteger,
   totalOrders: nonNegativeInteger,
   totalRevenue: nonNegativeNumber,

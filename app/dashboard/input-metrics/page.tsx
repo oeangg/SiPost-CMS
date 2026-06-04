@@ -1,5 +1,6 @@
 import { FileBarChart, Search } from "lucide-react";
 import type { Prisma } from "@prisma/client";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PostMetricForm } from "@/components/metrics/post-metric-form";
@@ -14,8 +15,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { contentTypes, platforms } from "@/lib/validations/content-post";
+import { platforms } from "@/lib/validations/content-post";
 
 const pageSize = 20;
 
@@ -78,14 +80,14 @@ function buildPageHref(
   filters: {
     q: string;
     platform: string;
-    contentType: string;
+    categoryId: string;
   },
 ) {
   const params = new URLSearchParams();
 
   if (filters.q) params.set("q", filters.q);
   if (filters.platform) params.set("platform", filters.platform);
-  if (filters.contentType) params.set("contentType", filters.contentType);
+  if (filters.categoryId) params.set("categoryId", filters.categoryId);
   if (page > 1) params.set("page", String(page));
 
   const query = params.toString();
@@ -97,7 +99,7 @@ type InputMetricsPageProps = {
   searchParams: Promise<{
     q?: string | string[];
     platform?: string | string[];
-    contentType?: string | string[];
+    categoryId?: string | string[];
     page?: string | string[];
   }>;
 };
@@ -106,20 +108,39 @@ export default async function InputMetricsPage({
   searchParams,
 }: InputMetricsPageProps) {
   const params = await searchParams;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const q = getSingleSearchParam(params.q).trim();
   const platform = getSingleSearchParam(params.platform);
-  const contentType = getSingleSearchParam(params.contentType);
+  const categoryId = getSingleSearchParam(params.categoryId);
   const rawPage = Number(getSingleSearchParam(params.page, "1"));
   const currentPage =
     Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
   const metricDateInput = toDateInputValue(new Date());
 
+  const categories = await prisma.categoryContent.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      categoryName: "asc",
+    },
+  });
+  const categoryIds = categories.map((category) => category.id);
   const filters = {
     q,
     platform: isOption(platforms, platform) ? platform : "",
-    contentType: isOption(contentTypes, contentType) ? contentType : "",
+    categoryId: categoryIds.includes(categoryId) ? categoryId : "",
   };
-  const where: Prisma.ContentPostWhereInput = {};
+  const where: Prisma.ContentPostWhereInput = {
+    userId: session.user.id,
+  };
 
   if (filters.q) {
     where.hook = {
@@ -132,14 +153,15 @@ export default async function InputMetricsPage({
     where.platform = filters.platform as (typeof platforms)[number];
   }
 
-  if (filters.contentType) {
-    where.contentType = filters.contentType as (typeof contentTypes)[number];
+  if (filters.categoryId) {
+    where.categoryId = filters.categoryId;
   }
 
   const [contentPosts, totalRows] = await Promise.all([
     prisma.contentPost.findMany({
       where,
       include: {
+        categoryName: true,
         metrics: {
           where: {
             metricDate: new Date(metricDateInput),
@@ -234,15 +256,15 @@ export default async function InputMetricsPage({
               ))}
             </Select>
             <Select
-              name="contentType"
-              defaultValue={filters.contentType}
+              name="categoryId"
+              defaultValue={filters.categoryId}
               aria-label="Filter kategori"
               className="min-w-0"
             >
               <option value="">Semua Kategori</option>
-              {contentTypes.map((item) => (
-                <option key={item} value={item}>
-                  {item}
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.categoryName}
                 </option>
               ))}
             </Select>
@@ -276,7 +298,7 @@ export default async function InputMetricsPage({
                             {formatOptionLabel(content.platform)}
                           </Badge>
                           <Badge variant="secondary">
-                            {formatOptionLabel(content.contentType)}
+                            {content.categoryName.categoryName}
                           </Badge>
                           {metric ? (
                             <Badge variant="success">Sudah ada data</Badge>

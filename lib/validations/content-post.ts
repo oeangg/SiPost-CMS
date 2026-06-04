@@ -1,15 +1,5 @@
 import { z } from "zod";
 
-export const contentTypes = [
-  "TRAVELLING_LAUT",
-  "TRAVELLING_GUNUNG",
-  "SOFT_SELLING",
-  "HARD_SELLING",
-  "STORYTELLING",
-  "PERSIB",
-  "LAINNYA",
-] as const;
-
 export const platforms = [
   "INSTAGRAM",
   "TIKTOK",
@@ -43,7 +33,7 @@ export const contentPostSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  contentType: z.enum(contentTypes),
+  categoryId: z.string().min(1, "Kategori konten wajib dipilih"),
   platform: z.enum(platforms),
   affiliateType: z.enum(affiliateTypes).optional().nullable().or(z.literal("")),
 });

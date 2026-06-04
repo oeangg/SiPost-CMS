@@ -14,7 +14,6 @@ import { ContentRichTextEditor } from "@/components/content/content-rich-text-ed
 import {
   affiliateTypes,
   contentPostSchema,
-  contentTypes,
   platforms,
   type ContentPostFormValues,
 } from "@/lib/validations/content-post";
@@ -24,6 +23,10 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
 type ContentPostFormProps = {
+  categories: Array<{
+    id: string;
+    categoryName: string;
+  }>;
   contentId?: string;
   defaultValues?: ContentPostFormValues;
   submitLabel?: string;
@@ -31,6 +34,7 @@ type ContentPostFormProps = {
 };
 
 export function ContentPostForm({
+  categories,
   contentId,
   defaultValues,
   submitLabel = "Simpan Konten",
@@ -50,7 +54,7 @@ export function ContentPostForm({
       content: "",
       hook: "",
       affiliateUrl: "",
-      contentType: "LAINNYA",
+      categoryId: categories[0]?.id ?? "",
       platform: "THREADS",
       affiliateType: "SHOPEE",
       ...defaultValues,
@@ -106,14 +110,20 @@ export function ContentPostForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="contentType">Kategori Konten</Label>
-          <Select id="contentType" {...register("contentType")}>
-            {contentTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
+          <Label htmlFor="categoryId">Kategori Konten</Label>
+          <Select id="categoryId" {...register("categoryId")} disabled={categories.length === 0}>
+            {categories.length === 0 ? (
+              <option value="">Buat kategori terlebih dahulu</option>
+            ) : null}
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.categoryName}
               </option>
             ))}
           </Select>
+          {errors.categoryId ? (
+            <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+          ) : null}
         </div>
       </div>
 

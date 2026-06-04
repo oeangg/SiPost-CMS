@@ -71,8 +71,14 @@ const sidebarMenu = [
   },
   {
     title: "Pengaturan",
-    url: "/dashboard",
+    url: "/dashboard/pengaturan/category",
     icon: Settings,
+    items: [
+      {
+        title: "Kategori Konten",
+        url: "/dashboard/pengaturan/category",
+      },
+    ],
   },
 ];
 

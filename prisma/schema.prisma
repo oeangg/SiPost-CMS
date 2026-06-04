@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum kategoriPlatform {
   FACEBOOK
   INSTAGRAM
@@ -38,19 +37,19 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  role          UserRole  @default(ADMIN)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  contentPost ContentPost[]
-  categoryContent  CategoryContent[]
-   afiliateDailySumaries   AfiliateDailySumary[]
+  id                      String                 @id
+  name                    String
+  email                   String                 @unique
+  emailVerified           Boolean                @default(false)
+  image                   String?
+  role                    UserRole               @default(ADMIN)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  sessions                Session[]
+  accounts                Account[]
+  contentPosts            ContentPost[]
+  categoryContents        CategoryContent[]
+  afiliateDailySumaries   AfiliateDailySumary[]
 }
 
 model Session {
@@ -97,30 +96,36 @@ model ContentPost {
   hook          String?
   affiliateUrl  String?
   mediaUrls     String[]          @default([])
-  
+
   userId        String
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  categoryId  String
-  categoryName CategoryContent @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  categoryName  CategoryContent   @relation(fields: [categoryId], references: [id])
 
-  platform      kategoriPlatform 
+  platform      kategoriPlatform
   affiliateType kategoriAfiliate?
   status        PostStatus        @default(DRAFT)
   publishedAt   DateTime?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   metrics       PostMetric[]
+
+  @@index([userId])
+  @@index([categoryId])
 }
 
 model CategoryContent {
-  id  String  @id @default(cuid())
+  id           String @id @default(cuid())
   categoryName String
 
-  userId        String
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  contentPost ContentPost[]
+  contentPosts ContentPost[]
+
+  @@unique([userId, categoryName])
+  @@index([userId])
 }
 
 model PostMetric {
@@ -143,12 +148,12 @@ model PostMetric {
 }
 
 model AfiliateDailySumary {
-  id            String           @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId        String
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  summaryDate   DateTime         @unique
+  summaryDate   DateTime
   affiliateType kategoriAfiliate @default(SHOPEE)
   totalClicks   Int              @default(0)
   totalOrders   Int              @default(0)
@@ -157,7 +162,7 @@ model AfiliateDailySumary {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   metrics       PostMetric[]
-  
+
   @@unique([userId, summaryDate, affiliateType])
-    @@index([userId])
+  @@index([userId])
 }

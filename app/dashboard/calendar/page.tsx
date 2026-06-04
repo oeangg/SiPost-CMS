@@ -1,4 +1,5 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 const dayLabels = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 
@@ -105,10 +107,12 @@ function getPlatformCode(platform: string) {
 
 function getContentLabel(content: {
   body: string | null;
-  contentType: string;
+  categoryName: {
+    categoryName: string;
+  };
   hook: string | null;
 }) {
-  return content.hook || htmlToPlainText(content.body) || content.contentType;
+  return content.hook || htmlToPlainText(content.body) || content.categoryName.categoryName;
 }
 
 type CalendarPageProps = {
@@ -119,6 +123,14 @@ type CalendarPageProps = {
 
 export default async function CalendarPage({ searchParams }: CalendarPageProps) {
   const params = await searchParams;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const monthStart = parseMonthParam(params.month);
 
   if (!monthStart) {
@@ -142,10 +154,14 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
   );
   const contentPosts = await prisma.contentPost.findMany({
     where: {
+      userId: session.user.id,
       publishedAt: {
         gte: monthStart,
         lt: nextMonthStart,
       },
+    },
+    include: {
+      categoryName: true,
     },
     orderBy: [
       {

@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContentPostForm } from "@/components/content/content-post-form";
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type EditContentPageProps = {
@@ -20,13 +22,29 @@ type EditContentPageProps = {
 
 export default async function EditContentPage({ params }: EditContentPageProps) {
   const { id } = await params;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    notFound();
+  }
+
   const content = await prisma.contentPost.findUnique({
     where: {
       id,
     },
   });
+  const categories = await prisma.categoryContent.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      categoryName: "asc",
+    },
+  });
 
-  if (!content) {
+  if (!content || content.userId !== session.user.id) {
     notFound();
   }
 
@@ -54,12 +72,13 @@ export default async function EditContentPage({ params }: EditContentPageProps) 
         </CardHeader>
         <CardContent>
           <ContentPostForm
+            categories={categories}
             contentId={content.id}
             defaultValues={{
               content: content.body ?? "",
               hook: content.hook ?? "",
               affiliateUrl: content.affiliateUrl ?? "",
-              contentType: content.contentType,
+              categoryId: content.categoryId,
               platform: content.platform,
               affiliateType: content.affiliateType ?? "",
             }}

@@ -1,4 +1,5 @@
 import { CalendarDays, Search } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AffiliateDailySummaryForm } from "@/components/affiliate/affiliate-daily-summary-form";
@@ -12,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const pageSize = 20;
@@ -123,6 +125,14 @@ export default async function AffiliateSummaryPage({
   searchParams,
 }: AffiliateSummaryPageProps) {
   const params = await searchParams;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const rawDate = getSingleSearchParam(params.date);
   const rawMinClicks = getSingleSearchParam(params.minClicks);
   const rawMinOrders = getSingleSearchParam(params.minOrders);
@@ -143,6 +153,7 @@ export default async function AffiliateSummaryPage({
 
   const contentPosts = await prisma.contentPost.findMany({
     where: {
+      userId: session.user.id,
       publishedAt: {
         not: null,
       },
@@ -151,6 +162,7 @@ export default async function AffiliateSummaryPage({
       },
     },
     include: {
+      categoryName: true,
       metrics: {
         orderBy: {
           metricDate: "desc",
@@ -212,6 +224,8 @@ export default async function AffiliateSummaryPage({
   );
   const summaries = await prisma.afiliateDailySumary.findMany({
     where: {
+      userId: session.user.id,
+      affiliateType: "SHOPEE",
       summaryDate: {
         in: dateKeys.map((dateKey) => new Date(`${dateKey}T00:00:00.000Z`)),
       },
@@ -439,7 +453,7 @@ export default async function AffiliateSummaryPage({
                                   {formatOptionLabel(post.platform)}
                                 </Badge>
                                 <Badge variant="secondary">
-                                  {formatOptionLabel(post.contentType)}
+                                  {post.categoryName.categoryName}
                                 </Badge>
                                 {post.affiliateType ? (
                                   <Badge variant="outline">
@@ -491,6 +505,7 @@ export default async function AffiliateSummaryPage({
                     <AffiliateDailySummaryForm
                       defaultValues={{
                         summaryDate: dateKey,
+                        affiliateType: "SHOPEE",
                         totalClicks: summary?.totalClicks ?? 0,
                         totalOrders: summary?.totalOrders ?? 0,
                         totalRevenue: Number(summary?.totalRevenue ?? 0),

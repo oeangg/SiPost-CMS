@@ -1,4 +1,6 @@
 import { BarChart3, Eye, Link2, MousePointerClick, Trophy } from "lucide-react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("id-ID").format(value);
@@ -46,6 +49,14 @@ function getMetricScore(metric: {
 }
 
 export default async function DashboardPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const [
     contentCount,
     publishedCount,
@@ -54,13 +65,23 @@ export default async function DashboardPage() {
     postsWithMetrics,
     recentAffiliateSummaries,
   ] = await Promise.all([
-    prisma.contentPost.count(),
     prisma.contentPost.count({
       where: {
+        userId: session.user.id,
+      },
+    }),
+    prisma.contentPost.count({
+      where: {
+        userId: session.user.id,
         status: "PUBLISHED",
       },
     }),
     prisma.postMetric.aggregate({
+      where: {
+        contentPost: {
+          userId: session.user.id,
+        },
+      },
       _sum: {
         comments: true,
         likes: true,
@@ -70,6 +91,9 @@ export default async function DashboardPage() {
       },
     }),
     prisma.afiliateDailySumary.aggregate({
+      where: {
+        userId: session.user.id,
+      },
       _sum: {
         totalClicks: true,
         totalOrders: true,
@@ -77,6 +101,9 @@ export default async function DashboardPage() {
       },
     }),
     prisma.contentPost.findMany({
+      where: {
+        userId: session.user.id,
+      },
       include: {
         metrics: true,
       },
@@ -86,6 +113,9 @@ export default async function DashboardPage() {
       take: 25,
     }),
     prisma.afiliateDailySumary.findMany({
+      where: {
+        userId: session.user.id,
+      },
       orderBy: {
         summaryDate: "desc",
       },

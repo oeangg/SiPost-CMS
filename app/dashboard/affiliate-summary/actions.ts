@@ -50,6 +50,7 @@ export async function upsertAffiliateDailySummaryAction(
   }
 
   const summaryDate = parseDateInput(parsed.data.summaryDate);
+  const userId = session.user.id;
 
   if (!summaryDate) {
     return {
@@ -61,10 +62,16 @@ export async function upsertAffiliateDailySummaryAction(
   const nextDay = getNextDay(summaryDate);
   const summary = await prisma.afiliateDailySumary.upsert({
     where: {
-      summaryDate,
+      userId_summaryDate_affiliateType: {
+        userId,
+        summaryDate,
+        affiliateType: parsed.data.affiliateType,
+      },
     },
     create: {
+      userId,
       summaryDate,
+      affiliateType: parsed.data.affiliateType,
       totalClicks: parsed.data.totalClicks,
       totalOrders: parsed.data.totalOrders,
       totalRevenue: parsed.data.totalRevenue,
@@ -81,10 +88,12 @@ export async function upsertAffiliateDailySummaryAction(
   await prisma.postMetric.updateMany({
     where: {
       contentPost: {
+        userId,
         publishedAt: {
           gte: summaryDate,
           lt: nextDay,
         },
+        affiliateType: parsed.data.affiliateType,
       },
     },
     data: {

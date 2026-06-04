@@ -1,5 +1,6 @@
 import { BarChart3, Link2, Plus, Search } from "lucide-react";
 import type { Prisma } from "@prisma/client";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ContentPostActions } from "@/components/content/content-post-actions";
@@ -24,10 +25,10 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import {
-  contentTypes,
   platforms,
   postStatuses,
 } from "@/lib/validations/content-post";
+import { auth } from "@/lib/auth";
 
 const pageSize = 20;
 
@@ -88,7 +89,7 @@ function buildPageHref(
   filters: {
     q: string;
     platform: string;
-    contentType: string;
+    categoryId: string;
     status: string;
   },
 ) {
@@ -96,7 +97,7 @@ function buildPageHref(
 
   if (filters.q) params.set("q", filters.q);
   if (filters.platform) params.set("platform", filters.platform);
-  if (filters.contentType) params.set("contentType", filters.contentType);
+  if (filters.categoryId) params.set("categoryId", filters.categoryId);
   if (filters.status) params.set("status", filters.status);
   if (page > 1) params.set("page", String(page));
 
@@ -109,7 +110,7 @@ type ContentDashboardPageProps = {
   searchParams: Promise<{
     q?: string | string[];
     platform?: string | string[];
-    contentType?: string | string[];
+    categoryId?: string | string[];
     status?: string | string[];
     page?: string | string[];
   }>;
@@ -119,21 +120,40 @@ export default async function ContentDashboardPage({
   searchParams,
 }: ContentDashboardPageProps) {
   const params = await searchParams;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   const q = getSingleSearchParam(params.q).trim();
   const platform = getSingleSearchParam(params.platform);
-  const contentType = getSingleSearchParam(params.contentType);
+  const categoryId = getSingleSearchParam(params.categoryId);
   const status = getSingleSearchParam(params.status);
   const rawPage = Number(getSingleSearchParam(params.page, "1"));
   const currentPage =
     Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
 
+  const categories = await prisma.categoryContent.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    orderBy: {
+      categoryName: "asc",
+    },
+  });
+  const categoryIds = categories.map((category) => category.id);
   const filters = {
     q,
     platform: isOption(platforms, platform) ? platform : "",
-    contentType: isOption(contentTypes, contentType) ? contentType : "",
+    categoryId: categoryIds.includes(categoryId) ? categoryId : "",
     status: isOption(postStatuses, status) ? status : "",
   };
-  const where: Prisma.ContentPostWhereInput = {};
+  const where: Prisma.ContentPostWhereInput = {
+    userId: session.user.id,
+  };
 
   if (filters.q) {
     where.hook = {
@@ -146,8 +166,8 @@ export default async function ContentDashboardPage({
     where.platform = filters.platform as (typeof platforms)[number];
   }
 
-  if (filters.contentType) {
-    where.contentType = filters.contentType as (typeof contentTypes)[number];
+  if (filters.categoryId) {
+    where.categoryId = filters.categoryId;
   }
 
   if (filters.status) {
@@ -157,6 +177,9 @@ export default async function ContentDashboardPage({
   const [contentPosts, totalRows] = await Promise.all([
     prisma.contentPost.findMany({
       where,
+      include: {
+        categoryName: true,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -256,15 +279,15 @@ export default async function ContentDashboardPage({
                 ))}
               </Select>
               <Select
-                name="contentType"
-                defaultValue={filters.contentType}
+                name="categoryId"
+                defaultValue={filters.categoryId}
                 aria-label="Filter kategori"
                 className="min-w-0"
               >
                 <option value="">Semua Kategori</option>
-                {contentTypes.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.categoryName}
                   </option>
                 ))}
               </Select>
@@ -315,7 +338,7 @@ export default async function ContentDashboardPage({
                           {content.hook || "-"}
                         </h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {content.platform} / {content.contentType}
+                          {content.platform} / {content.categoryName.categoryName}
                         </p>
                       </div>
                       <div className="shrink-0">
@@ -359,7 +382,7 @@ export default async function ContentDashboardPage({
                   {contentPosts.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="text-center text-muted-foreground"
                       >
                         Belum ada konten.
@@ -377,7 +400,7 @@ export default async function ContentDashboardPage({
                           {htmlToPlainText(content.body) || "-"}
                         </p>
                       </TableCell>
-                      <TableCell>{content.contentType}</TableCell>
+                      <TableCell>{content.categoryName.categoryName}</TableCell>
                       <TableCell>
                         <ContentPostStatusSelect
                           contentId={content.id}

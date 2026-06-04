@@ -59,6 +59,7 @@ export function AffiliateDailySummaryForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <input type="hidden" {...register("summaryDate")} />
+      <input type="hidden" {...register("affiliateType")} />
 
       <div className="grid gap-3 grid-cols-3">
         <div className="space-y-2">

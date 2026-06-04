@@ -25,7 +25,9 @@ type ContentPostActionItem = {
   body: string | null;
   hook: string | null;
   affiliateUrl: string | null;
-  contentType: string;
+  categoryName: {
+    categoryName: string;
+  };
   platform: string;
   affiliateType: string | null;
   status: string;
@@ -289,7 +291,7 @@ export function ContentPostActions({
             <div className="flex flex-wrap gap-2">
               <Badge variant="warning">{content.status}</Badge>
               <Badge variant="secondary">{content.platform}</Badge>
-              <Badge variant="secondary">{content.contentType}</Badge>
+              <Badge variant="secondary">{content.categoryName.categoryName}</Badge>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

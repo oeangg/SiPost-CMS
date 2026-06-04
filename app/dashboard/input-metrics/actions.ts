@@ -24,11 +24,13 @@ async function requireSession() {
     headers: await headers(),
   });
 
-  return Boolean(session);
+  return session;
 }
 
 export async function upsertPostMetricAction(values: PostMetricFormValues) {
-  if (!(await requireSession())) {
+  const session = await requireSession();
+
+  if (!session) {
     return {
       ok: false,
       message: "Session tidak valid. Silakan login ulang.",
@@ -59,10 +61,11 @@ export async function upsertPostMetricAction(values: PostMetricFormValues) {
     },
     select: {
       id: true,
+      userId: true,
     },
   });
 
-  if (!contentExists) {
+  if (!contentExists || contentExists.userId !== session.user.id) {
     return {
       ok: false,
       message: "Konten tidak ditemukan.",

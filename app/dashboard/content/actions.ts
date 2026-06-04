@@ -32,13 +32,31 @@ export async function createContentPostAction(values: ContentPostFormValues) {
   }
 
   const data = parsed.data;
+  const userId = session.user.id;
+  const category = await prisma.categoryContent.findFirst({
+    where: {
+      id: data.categoryId,
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!category) {
+    return {
+      ok: false,
+      message: "Kategori konten tidak ditemukan.",
+    };
+  }
 
   await prisma.contentPost.create({
     data: {
+      userId,
       body: data.content,
       hook: data.hook,
       affiliateUrl: data.affiliateUrl || null,
-      contentType: data.contentType,
+      categoryId: data.categoryId,
       platform: data.platform,
       affiliateType: data.affiliateType || null,
     },
@@ -77,20 +95,45 @@ export async function updateContentPostAction(
   }
 
   const data = parsed.data;
+  const userId = session.user.id;
+  const category = await prisma.categoryContent.findFirst({
+    where: {
+      id: data.categoryId,
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
 
-  await prisma.contentPost.update({
+  if (!category) {
+    return {
+      ok: false,
+      message: "Kategori konten tidak ditemukan.",
+    };
+  }
+
+  const result = await prisma.contentPost.updateMany({
     where: {
       id,
+      userId,
     },
     data: {
       body: data.content,
       hook: data.hook,
       affiliateUrl: data.affiliateUrl || null,
-      contentType: data.contentType,
+      categoryId: data.categoryId,
       platform: data.platform,
       affiliateType: data.affiliateType || null,
     },
   });
+
+  if (result.count === 0) {
+    return {
+      ok: false,
+      message: "Konten tidak ditemukan.",
+    };
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/content");
@@ -114,11 +157,19 @@ export async function deleteContentPostAction(id: string) {
     };
   }
 
-  await prisma.contentPost.delete({
+  const result = await prisma.contentPost.deleteMany({
     where: {
       id,
+      userId: session.user.id,
     },
   });
+
+  if (result.count === 0) {
+    return {
+      ok: false,
+      message: "Konten tidak ditemukan.",
+    };
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/content");
@@ -166,15 +217,23 @@ export async function updateContentPostStatusAction(
     }
   }
 
-  await prisma.contentPost.update({
+  const result = await prisma.contentPost.updateMany({
     where: {
       id,
+      userId: session.user.id,
     },
     data: {
       status: typedStatus,
       publishedAt: nextPublishedAt,
     },
   });
+
+  if (result.count === 0) {
+    return {
+      ok: false,
+      message: "Konten tidak ditemukan.",
+    };
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/content");
